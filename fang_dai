@@ -1,0 +1,137 @@
+"""
+    作者：Famisi
+    日期：10/1/2018
+    版本：V1.2
+
+房贷的计算公式：
+贷款总额：M
+贷款年利率：Py
+贷款月利率：P
+贷款年限：Y
+贷款分期数：Y*12
+月供金额：X
+公积金贷款年利率：3.25%
+商业贷款年利率：4.9%
+
+***等额本息法***
+P=Py/12(%)
+X=[P(1+P)^n/((1+P)^n-1)]*M
+
+***等额本金法***
+本金还款+利息还款
+月还款额=当月本金还款+当月利息（每月利息是变化的，因为贷款本金在不断减少）
+当月本金还款=总贷款数÷还款次数
+当月利息=上月剩余本金*月利率=总贷款数*（1-（第几次还款月数-1）÷还款次数）×月利率
+
+等额本息还款：把按揭贷款的本金总额与利息总额相加，然后平均分摊到还款期限的每个月中。
+            作为还款人，每个月还给银行固定金额，但每月还款额中的本金比重逐月递增、利息比重逐月递减。
+等额本金还款：将本金分摊到每个月内,同时付清上一交易日至本次还款日之间的利息。这种还款方式相对等额本息而言,
+            总的利息支出较低,但是前期支付的本金和利息较多,还款负担逐月递减。
+
+"""
+
+
+def ben_xi_huan_kuan(total, fenqi, yearlilv):          # 等额本息法
+    p = yearlilv/12/100
+    tempP = (1+p) ** fenqi
+    return p * tempP / (tempP-1) * total
+
+
+def ben_jin_huan_kuan(total, fenqi, yearlilv):           # 等额本金法
+    yueLiXi = []
+    yueLiXi.clear()
+    yueLiLv = yearlilv / 12 / 100
+    i = 1
+    while i <= fenqi:
+        temp = (1 - (i-1) / fenqi) * total * yueLiLv
+        yueLiXi.append(temp)
+        i += 1
+    return yueLiXi
+
+
+def main():
+    while True:
+        go_on = False
+        count = 0
+        print('*-' * 50)
+        # 读取贷款总额
+        totalStr = input("贷款总额 M：")
+        if totalStr.lower() == 'n'or totalStr.lower() == 'exit':
+            break
+        else:
+            try:
+                total = eval(totalStr)
+            except:
+                print('输入数据有误！请重输。')
+                continue
+        # 读取贷款年利率
+        lilvStr = input("贷款年利率 Py%(输入a或者不输表示 3.25%，输入b表示4.9%)：")
+        if lilvStr.lower() == 'n'or lilvStr.lower() == 'exit':
+            break
+        elif lilvStr.lower() == 'a'or lilvStr == '':    # 不输入或者输入 a 表示公积金贷款：3.25%
+            lilv = 3.25
+        elif lilvStr.lower() == 'b':                    # 输入 b 表示商业贷款：4.9%
+            lilv = 4.9
+        else:
+            try:
+                lilv = eval(lilvStr)
+            except:
+                print('输入数据有误！请重输。')
+                continue
+        # 读取贷款分期数
+        fenqiStr = input("总分期数（单位：年）：")
+        if fenqiStr.lower() == 'n'or fenqiStr.lower() == 'exit':
+            break
+        else:
+            try:
+                fenqi = eval(fenqiStr) * 12
+            except :
+                print('输入数据有误！请重输。')
+                continue
+        # 计算‘等额本息还款’
+        yuegong = ben_xi_huan_kuan(total, fenqi, lilv)
+        print('\n')
+        print('*'*25+'等额本息还款'+'*'*25)
+        print('年利率 Y：', lilv)
+        print('月利率 P：', lilv/12/100)
+        print('月供 X：%.2f'%yuegong)
+        benxicount = yuegong*fenqi-total
+        # print('\n')
+        print('===%d期总利息为：%.2f===' % (fenqi, benxicount))
+
+        print('\n')
+        print('*'*25+'等额本金还款'+'*'*25)
+        print('年利率 Y：', lilv)
+        print('月利率 P：', lilv/12/100)
+        print('月本金还款：%.2f' % (total/fenqi))
+
+        # 计算‘等额本金还款’
+        yuexi = ben_jin_huan_kuan(total, fenqi, lilv)
+        benjincount = sum(yuexi)
+        # print('\n')
+        print('===%d期总利息为：%.2f===' % (fenqi, benjincount))
+        print('\n')
+        print('-*' * 20)
+        print('| 等额本金 比 等额本息 节省：%.2f |' % (benxicount-benjincount))
+        print('-*' * 20)
+        print('\n等额本金月利息 & 还款数：\n')
+        for i, j in enumerate(yuexi):
+            # %m.nf 格式：总位数m（包含小数点），小数n位
+            print("第%3d期:%7.2f,还:%7.2f" % (i+1, j, j+total/fenqi), end=' | ')
+            count += 1
+            if not count % 5:
+                print()
+                print('-' * 144)
+                print()
+                # os.system('pause')
+                if not go_on:
+                    key = input('按"回车"显示下一栏，输入"go"输出后续全部>>>\n')
+
+                    if key.lower() == 'n':
+                        break
+                    elif key.lower() == 'go':
+                        go_on = True
+
+
+if __name__ == '__main__':
+    main()
